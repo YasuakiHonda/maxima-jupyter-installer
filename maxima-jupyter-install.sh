@@ -1,0 +1,49 @@
+#!/bin/sh
+cd $HOME
+#check if homebrew is installed
+which brew
+if [ $? -ne 0 ]; then
+  echo 'Error: Homebrew not installed.'
+  exit 1
+fi
+
+brew install jupyterlab maxima
+#check if curl is installed
+which curl
+if [ $? -ne 0 ]; then
+  echo 'Error: Curl not installed.'
+  exit 1
+fi
+
+if [ -e quicklisp ]; then
+  echo "Quicklisp is already installed. Skipping the installation."
+else
+  echo "Installing quicklisp"
+  curl -O https://beta.quicklisp.org/quicklisp.lisp
+  sbcl --load quicklisp.lisp --eval "(quicklisp-quickstart:install)" --eval "(ql-util:without-prompting (ql:add-to-init-file))" --quit
+fi
+
+#check if git is installed
+which git
+if [ $? -ne 0 ]; then
+  echo "Error: git not installed."
+  exit 1
+fi
+
+if [ -e maxima-jupyter ]; then
+  echo "Maxima-jupyter exists. Skipping the download."
+else
+  git clone https://github.com/robert-dodier/maxima-jupyter.git
+fi
+cd maxima-jupyter
+export C_INCLUDE_PATH="/opt/homebrew/include/"
+maxima -r "load(\"load-maxima-jupyter.lisp\");jupyter_install();quit();"
+
+cd $HOME
+if [ -e .maxima ]; then
+cat << _EOS_ >> .maxima/maxima-init.mac
+set_plot_option([svg_file,"~/.maxplot.svg"])$
+set_plot_option([plot_format,gnuplot])$
+set_draw_defaults(file_name="~/maxout.svg",terminal='svg)$
+_EOS_
+fi
