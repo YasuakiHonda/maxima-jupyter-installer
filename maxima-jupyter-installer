@@ -36,7 +36,7 @@ else
   git clone https://github.com/robert-dodier/maxima-jupyter.git
 fi
 cd maxima-jupyter
-export C_INCLUDE_PATH="/opt/homebrew/include/"
+export C_INCLUDE_PATH="/opt/homebrew/include:$HOME/.linuxbrew/include"
 maxima -r "load(\"load-maxima-jupyter.lisp\");jupyter_install();quit();"
 
 cd $HOME
